@@ -46,14 +46,21 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const formData = new FormData(exerciseForm);
             const userId = formData.get('_id');
-            formData.delete('_id');
+
+            // Keep _id in the URL but remove it from the form data that's sent
+            const formDataToSend = new FormData();
+            for (const [key, value] of formData.entries()) {
+                if (key !== '_id') {
+                    formDataToSend.append(key, value);
+                }
+            }
 
             const response = await fetch(`/api/users/${userId}/exercises`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded'
                 },
-                body: new URLSearchParams(formData)
+                body: new URLSearchParams(formDataToSend)
             });
 
             const data = await response.json();

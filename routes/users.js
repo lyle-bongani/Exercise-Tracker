@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
+const Exercise = require('../models/Exercise');
 
 // POST /api/users - Create a new user
 router.post('/users', async (req, res) => {
@@ -14,7 +15,10 @@ router.post('/users', async (req, res) => {
         // Check if user already exists
         const existingUser = await User.findOne({ username });
         if (existingUser) {
-            return res.json(existingUser);
+            return res.json({
+                username: existingUser.username,
+                _id: existingUser._id
+            });
         }
 
         // Create new user
@@ -35,6 +39,7 @@ router.post('/users', async (req, res) => {
 router.get('/users', async (req, res) => {
     try {
         const users = await User.find({}, '_id username');
+        // Return array of users with _id and username
         res.json(users);
     } catch (err) {
         console.error(err);
@@ -63,24 +68,24 @@ router.post('/users/:_id/exercises', async (req, res) => {
             return res.status(400).json({ error: 'Duration must be a number' });
         }
 
-        // Create exercise object
-        const exercise = {
-            description,
+        // Create new exercise
+        const newExercise = new Exercise({
+            userId: userId,
+            description: description,
             duration: durationNum,
             date: date ? new Date(date) : new Date()
-        };
+        });
 
-        // Add exercise to user's log
-        user.log.push(exercise);
-        await user.save();
+        // Save the exercise
+        await newExercise.save();
 
         // Format response to match expected output
         return res.json({
+            _id: user._id,
             username: user.username,
-            description: exercise.description,
-            duration: exercise.duration,
-            date: exercise.date.toDateString(),
-            _id: user._id
+            description: newExercise.description,
+            duration: newExercise.duration,
+            date: newExercise.date.toDateString()
         });
     } catch (err) {
         console.error(err);
@@ -99,43 +104,44 @@ router.get('/users/:_id/logs', async (req, res) => {
             return res.status(404).json({ error: 'User not found' });
         }
 
-        // Filter logs based on date range (if provided)
-        let log = user.log;
+        // Build query to find exercises for this user
+        let query = { userId: userId };
 
-        if (from) {
-            const fromDate = new Date(from);
-            if (!isNaN(fromDate.getTime())) {
-                log = log.filter(exercise => exercise.date >= fromDate);
+        // Add date filters if provided
+        if (from || to) {
+            query.date = {};
+            if (from) {
+                query.date.$gte = new Date(from);
+            }
+            if (to) {
+                query.date.$lte = new Date(to);
             }
         }
 
-        if (to) {
-            const toDate = new Date(to);
-            if (!isNaN(toDate.getTime())) {
-                log = log.filter(exercise => exercise.date <= toDate);
-            }
-        }
+        // Get exercises
+        let exercises = await Exercise.find(query).sort({ date: 1 });
 
         // Apply limit if provided
         if (limit) {
             const limitNum = parseInt(limit);
             if (!isNaN(limitNum)) {
-                log = log.slice(0, limitNum);
+                exercises = exercises.slice(0, limitNum);
             }
         }
 
-        // Format the log to match expected output
-        const formattedLog = log.map(exercise => ({
-            description: exercise.description,
-            duration: exercise.duration,
-            date: exercise.date.toDateString()
+        // Format exercises for the log
+        const formattedExercises = exercises.map(ex => ({
+            description: ex.description,
+            duration: ex.duration,
+            date: ex.date.toDateString()
         }));
 
+        // Return the formatted response
         return res.json({
-            username: user.username,
-            count: formattedLog.length,
             _id: user._id,
-            log: formattedLog
+            username: user.username,
+            count: formattedExercises.length,
+            log: formattedExercises
         });
     } catch (err) {
         console.error(err);

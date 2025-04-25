@@ -1,27 +1,14 @@
 const mongoose = require('mongoose');
 
-const ExerciseSchema = new mongoose.Schema({
-    description: {
-        type: String,
-        required: true
-    },
-    duration: {
-        type: Number,
-        required: true
-    },
-    date: {
-        type: Date,
-        default: Date.now
-    }
-});
-
+// We'll use a simpler model structure to ensure the log format meets requirements
 const UserSchema = new mongoose.Schema({
     username: {
         type: String,
         required: true,
         unique: true
     },
-    log: [ExerciseSchema]
+    // We won't store exercises as embedded documents anymore
+    // Instead, we'll create a separate Exercise model
 });
 
 module.exports = mongoose.model('User', UserSchema); 
