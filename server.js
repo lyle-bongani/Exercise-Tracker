@@ -6,7 +6,7 @@ const path = require('path');
 
 // Initialize Express app
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3002;
 
 // In-memory storage
 const users = [];
@@ -134,6 +134,9 @@ app.get('/api/users/:_id/logs', (req, res) => {
         }
     }
 
+    // Sort exercises by date
+    userExercises.sort((a, b) => a.date - b.date);
+
     // Apply limit if provided
     if (limit) {
         const limitNum = parseInt(limit);
@@ -149,12 +152,15 @@ app.get('/api/users/:_id/logs', (req, res) => {
         date: ex.date.toDateString()
     }));
 
-    return res.json({
+    // Return user object with count and log array
+    const response = {
         _id: user._id,
         username: user.username,
         count: formattedExercises.length,
         log: formattedExercises
-    });
+    };
+
+    return res.json(response);
 });
 
 // Homepage route
