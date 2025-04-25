@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exercise Tracker</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container">
+        <h1>Exercise Tracker</h1>
+
+        <div class="card">
+            <h2>Create a New User</h2>
+            <form id="new-user-form" method="post" action="/api/users">
+                <div class="form-group">
+                    <label for="username">Username:</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <button type="submit">Create User</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <h2>Add Exercise</h2>
+            <form id="exercise-form" method="post">
+                <div class="form-group">
+                    <label for="userId">User ID:</label>
+                    <input type="text" id="userId" name="_id" required>
+                </div>
+                <div class="form-group">
+                    <label for="description">Description:</label>
+                    <input type="text" id="description" name="description" required>
+                </div>
+                <div class="form-group">
+                    <label for="duration">Duration (mins):</label>
+                    <input type="number" id="duration" name="duration" required>
+                </div>
+                <div class="form-group">
+                    <label for="date">Date (yyyy-mm-dd):</label>
+                    <input type="date" id="date" name="date">
+                </div>
+                <button type="submit">Add Exercise</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <h2>User Logs</h2>
+            <form id="log-form" method="get">
+                <div class="form-group">
+                    <label for="logUserId">User ID:</label>
+                    <input type="text" id="logUserId" name="userId" required>
+                </div>
+                <div class="form-group">
+                    <label for="from">From (yyyy-mm-dd):</label>
+                    <input type="date" id="from" name="from">
+                </div>
+                <div class="form-group">
+                    <label for="to">To (yyyy-mm-dd):</label>
+                    <input type="date" id="to" name="to">
+                </div>
+                <div class="form-group">
+                    <label for="limit">Limit:</label>
+                    <input type="number" id="limit" name="limit" min="1">
+                </div>
+                <button type="submit">Get Logs</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <h2>API Endpoints</h2>
+            <ul>
+                <li><strong>POST /api/users</strong> - Create a new user</li>
+                <li><strong>GET /api/users</strong> - Get a list of all users</li>
+                <li><strong>POST /api/users/:_id/exercises</strong> - Add an exercise</li>
+                <li><strong>GET /api/users/:_id/logs</strong> - Get user's exercise log</li>
+                <li><strong>GET /api/users/:_id/logs?from=&to=&limit=</strong> - Get filtered logs</li>
+            </ul>
+        </div>
+
+        <div id="result" class="card hidden">
+            <h2>Result</h2>
+            <pre id="result-json"></pre>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
